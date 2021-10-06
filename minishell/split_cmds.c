@@ -123,41 +123,49 @@ int     ft_check_pipe(t_list *shell)
     return (pipe);
 }
 
-t_list  *ft_split_pipe(t_list *shell,int pipe,int p)
+t_list  *ft_split_pipe(t_list *shell,int p,int *reminder)
 {
     static int i;
-    static int reminder;
     while(shell->buffer[i])
     {
         if (shell->buffer[i] == '"' || shell->buffer[i] == '\'')
             i = skip_quotes(i + 1, shell->buffer[i], shell->buffer);
         if (shell->buffer[i] == '|')
         {
-            shell->tab[p] = ft_substr(shell->buffer,reminder,i - reminder);
+            shell->tab[p] = ft_substr(shell->buffer,*reminder,i - *reminder);
             i++;
-            reminder = i;
-            break;
-        }
-        if (p == pipe)
-        {
-            shell->tab[p] = ft_substr(shell->buffer,reminder,ft_strlen(shell->buffer) - reminder);
+            *reminder = i;
             break;
         }
         i++;
     }
     return shell;
 }
-
+void    ft_last_command(t_list *shell, int p, int *reminder)
+{
+    shell->tab[p] = ft_substr(shell->buffer,*reminder, ft_strlen(shell->buffer) - *reminder);
+    printf("|%s|\n",shell->tab[p]);
+    shell->tab[++p] = NULL;
+}
 void    split_cmds(char **env, t_list *shell)
 {
     int pipe;
-    int i = 0;
+    int reminder;
+    int indice;
+
+    indice = 0;
+    reminder = 0;
     g_read = 0;
     pipe = ft_check_pipe(shell);
-    shell->tab = malloc(sizeof(char *) * pipe + 1);
-    ft_split_pipe(shell,pipe,0);
-    ft_split_pipe(shell,pipe,1);
-    ft_split_pipe(shell,pipe,2);
+    shell->tab = malloc(sizeof(char *) * (pipe + 2));
+    while(indice < pipe)
+    {
+        ft_split_pipe(shell,indice,&reminder);
+        indice++;
+    }
+
+    
+    ft_last_command(shell,indice,&reminder);
     ft_check_redr(shell);
     get_first_command(shell);
     get_rest_command(shell);
