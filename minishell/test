@@ -1,0 +1,24 @@
+shell->buffer = "echo ok >     ayajghro     $USER";
+
+
+ptr = "  echo      ok    $USER";
+
+
+
+
+
+shell[0]->f_cmd = "ls";
+shell[0]->rest = "- la";
+
+shell[1]->f_cmd = "grep";
+shell[1]->rest = "- la";
+
+
+"    tesrt ok "
+
+start = i + 1;
+i = 9;
+ptr = substrs9
+
+
+
