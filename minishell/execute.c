@@ -40,3 +40,20 @@ void exec_cmd(char **env, t_list *shell)
     }
     wait(NULL);
 }
+void exec_cmd_pipe(char **env, t_list *shell)
+{
+    int     i;
+    int     id;
+    char    **argvv;
+
+    id = fork();
+    i = 0;
+    if(id == 0)
+    {
+        close(shell->g_fd);
+        dup2(shell->stdio[1], 1);
+        argvv = ft_split(ft_join(shell),' ');
+        execute(shell, argvv);
+    }
+    wait(NULL);
+}

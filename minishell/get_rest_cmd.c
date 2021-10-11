@@ -81,3 +81,15 @@ void    get_rest_command(t_list *shell)
     shell->rest = remove_spaces(shell->rest);
     shell->rest = remove_quotes(shell->rest, shell);
 }
+
+void    get_rest_command_pipe(t_list *shell , int c)
+{
+    int i;
+    int len;
+
+    i = skip_spaces(0, shell->tab[c]);
+    len = ft_strlen(shell->tab[c]);
+    shell->rest = ft_substr(shell->tab[c], i, len - i);
+    shell->rest = remove_spaces(shell->rest);
+    shell->rest = remove_quotes(shell->rest, shell);
+}

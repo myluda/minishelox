@@ -110,3 +110,24 @@ void    get_first_command(t_list *shell)
     shell->f_cmd = remove_quotes(shell->f_cmd, shell);
     shell->buffer = ft_substr(shell->buffer, i, len - i);
 }
+
+void    get_first_command_pipe(t_list *shell, int c)
+{
+    int i;
+    int start;
+    int len;
+
+    i = skip_spaces(0, shell->tab[c]);
+    len = ft_strlen(shell->tab[c]);
+    start = i;
+    while(shell->tab[c][i] != ' ' && shell->tab[c][i]  != '\t' && shell->tab[c][i]  != '\0')
+    {
+        while(shell->tab[c][i]  == '\'' || shell->tab[c][i]  == '"')
+            i = skip_quotes(i + 1, shell->tab[c][i],shell->tab[c]);
+        if (shell->tab[c][i] != ' ')
+            i++;
+    }
+    shell->f_cmd = ft_substr(shell->tab[c] ,start,i - start);
+    shell->f_cmd = remove_quotes(shell->f_cmd, shell);
+    shell->tab[c] = ft_substr(shell->tab[c], i, len - i);
+}

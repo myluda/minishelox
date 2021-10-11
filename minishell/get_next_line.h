@@ -34,6 +34,7 @@ typedef struct t_list{
     char    *g_red_buff;
     node_t *head;
     int     stdio[2];
+    int     *g_fd_pipe;
     char    **path;
     int     g_fd;
     char **tab;

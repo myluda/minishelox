@@ -104,6 +104,19 @@ void    conditions(t_list *shell, char **env)
     else
         exec_cmd(env, shell);
 }
+void    conditions_pipes(t_list *shell, char **env,int i)
+{
+    if (!(ft_strcmp(shell->tab[i], "echo")))
+        echo(shell);
+    else if(!(ft_strcmp(shell->tab[i], "env")))
+        print_env(shell);
+    else if(!(ft_strcmp(shell->tab[i], "export")))
+        export(shell);
+    else if(!ft_strcmp(shell->tab[i], "unset"))
+        unset(shell);
+    else
+        exec_cmd(env, shell);
+}
 
 int     ft_check_pipe(t_list *shell)
 {
@@ -147,6 +160,68 @@ void    ft_last_command(t_list *shell, int p, int *reminder)
     printf("|%s|\n",shell->tab[p]);
     shell->tab[++p] = NULL;
 }
+
+void    ft_create_childprocess(t_list *shell,int pipes, int index)
+{
+    int i;
+    int pid;
+
+    pid = fork();
+    i = 0;
+
+    if (pid == 0)
+    {
+        if (index == 0) // first
+        {
+            dup2(fd_pipe[index * 2 + 1], 1);
+            while (i < pipes)
+                close(shell->g_fd_pipe[i++]);
+        }
+        else if (index == pipes - 1) // LAST
+        {
+            dup2(fd_pipe[index * 2 - 2], 0);
+            while (i < pipes)
+                close(shell->g_fd_pipe[i++]);
+        }
+        else // MIDDLE
+        {
+            dup2(fd_pipe[calc], 1);
+            dup2(fd_pipe[index * 2 - 2], 0);
+            while (i < pipes)
+                close(shell->g_fd_pipe[i++]);
+
+        }
+        close_all_fds();
+        execve();
+    }
+    while (i < pipes)
+    {
+        close(shell->g_fd_pipe[i++]);
+        wait(&status);
+    }
+    
+}
+
+void    ft_initiate_pipe(t_list *shell, int pipes)
+{
+    int i;
+    pid_t   pid;
+
+    i = 0;
+    shell->g_fd_pipe = malloc(sizeof(int) * (pipes + 1));
+    while(pipes > i)
+    {
+        pipe(shell->g_fd_pipe * i + 2);
+        i++;
+    }
+    i = 0;
+    while(pipes + 1 > i)
+    {
+        ft_create_childprocess(shell,pipes + 1, i);
+        i++;
+    }
+}
+
 void    split_cmds(char **env, t_list *shell)
 {
     int pipe;
@@ -163,18 +238,10 @@ void    split_cmds(char **env, t_list *shell)
         ft_split_pipe(shell,indice,&reminder);
         indice++;
     }
-
-    
     ft_last_command(shell,indice,&reminder);
     ft_check_redr(shell);
     get_first_command(shell);
     get_rest_command(shell);
     conditions(shell, env);
-   // printf("|%s|\n",shell->f_cmd);
-    //printf("|%s|\n",shell->rest);
-   // printlist(0);
-
-    
-    //buff = ft_remove_quotes(ft_remove_spaces(ft_check_redr(split[split_cpt],split_cpt), &start, &i),env);
-    //check_conditions(split_cpt, stdio, start, env, i, buff);
+    //START EXECUTION;
 }
