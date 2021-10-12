@@ -114,6 +114,14 @@ char    *expand_variable(t_list *shell, char *str, int *i, char *res);
 void    export(t_list *shell);
 void exec_cmd(char **env, t_list *shell);
 void    get_first_command(t_list *shell);
+void    get_first_command_pipe(t_list *shell, int c);
+void exec_cmd_pipe(char **env, t_list *shell, int i);
+void    get_rest_command_pipe(t_list *shell , int c);
+void    conditions_pipe(t_list *shell, char **env,int i);
+void    ft_initiate_pipe(t_list *shell, int pipes, char **env);
+
+
+
 
 
 #endif

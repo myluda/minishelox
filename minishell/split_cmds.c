@@ -104,7 +104,7 @@ void    conditions(t_list *shell, char **env)
     else
         exec_cmd(env, shell);
 }
-void    conditions_pipes(t_list *shell, char **env,int i)
+void    conditions_pipe(t_list *shell, char **env,int i)
 {
     if (!(ft_strcmp(shell->tab[i], "echo")))
         echo(shell);
@@ -115,7 +115,7 @@ void    conditions_pipes(t_list *shell, char **env,int i)
     else if(!ft_strcmp(shell->tab[i], "unset"))
         unset(shell);
     else
-        exec_cmd(env, shell);
+        exec_cmd_pipe(env, shell,i);
 }
 
 int     ft_check_pipe(t_list *shell)
@@ -157,44 +157,43 @@ t_list  *ft_split_pipe(t_list *shell,int p,int *reminder)
 void    ft_last_command(t_list *shell, int p, int *reminder)
 {
     shell->tab[p] = ft_substr(shell->buffer,*reminder, ft_strlen(shell->buffer) - *reminder);
-    printf("|%s|\n",shell->tab[p]);
     shell->tab[++p] = NULL;
 }
 
-void    ft_create_childprocess(t_list *shell,int pipes, int index)
+void    ft_create_childprocess(t_list *shell,int pipes, int index,char **env)
 {
     int i;
     int pid;
-
-    pid = fork();
-    i = 0;
+    int status;
+    static int d;
 
     if (pid == 0)
     {
         if (index == 0) // first
         {
-            dup2(fd_pipe[index * 2 + 1], 1);
-            while (i < pipes)
-                close(shell->g_fd_pipe[i++]);
+            dup2(shell->g_fd_pipe[index * 2 + 1], 1);
+            //
         }
         else if (index == pipes - 1) // LAST
         {
-            dup2(fd_pipe[index * 2 - 2], 0);
-            while (i < pipes)
-                close(shell->g_fd_pipe[i++]);
+            dup2(shell->g_fd_pipe[index * 2 - 2], 0);
+            //
         }
         else // MIDDLE
         {
-            dup2(fd_pipe[calc], 1);
-            dup2(fd_pipe[index * 2 - 2], 0);
-            while (i < pipes)
-                close(shell->g_fd_pipe[i++]);
-
+            dup2(shell->g_fd_pipe[index * 2 - 2], 1);
+            dup2(shell->g_fd_pipe[index * 2 - 2], 0);
+            //
         }
-        close_all_fds();
-        execve();
+        while (i < pipes * 2)
+            close(shell->g_fd_pipe[i++]);
+        get_first_command_pipe(shell,d);
+        get_rest_command_pipe(shell,d);
+        conditions_pipe(shell, env,d);
+        d++;
+    //     //ft_eexecutiion(hell, index);
     }
-    while (i < pipes)
+    while (i < pipes * 2)
     {
         close(shell->g_fd_pipe[i++]);
         wait(&status);
@@ -202,24 +201,35 @@ void    ft_create_childprocess(t_list *shell,int pipes, int index)
     
 }
 
-void    ft_initiate_pipe(t_list *shell, int pipes)
+void    ft_initiate_pipe(t_list *shell, int pipes, char **env)
 {
     int i;
     pid_t   pid;
 
     i = 0;
-    shell->g_fd_pipe = malloc(sizeof(int) * (pipes + 1));
-    while(pipes > i)
+    shell->g_fd_pipe = malloc(sizeof(int) * (pipes * 2));
+    while(pipes >= i)
     {
-        pipe(shell->g_fd_pipe * i + 2);
+        pipe(shell->g_fd_pipe + (2 * i)); 
         i++;
     }
     i = 0;
-    while(pipes + 1 > i)
+    while(pipes * 2 >= i)
     {
-        ft_create_childprocess(shell,pipes + 1, i);
+        printf("%d\n",shell->g_fd_pipe[i]);
         i++;
     }
+    // int j = -1;
+    // printf("PIPES FD : ");
+    // while (++j < pipes * 2)
+    // {
+    //     printf("[%d] ", shell->g_fd_pipe[j]);
+    // }
+    // while(pipes + 1 > i)
+    // {
+    //     ft_create_childprocess(shell,pipes + 1, i, env);
+    //     i++;
+    // }
 }
 
 void    split_cmds(char **env, t_list *shell)
@@ -239,9 +249,11 @@ void    split_cmds(char **env, t_list *shell)
         indice++;
     }
     ft_last_command(shell,indice,&reminder);
-    ft_check_redr(shell);
-    get_first_command(shell);
-    get_rest_command(shell);
-    conditions(shell, env);
+    ft_initiate_pipe(shell,pipe,env);
+    // ft_check_redr(shell);
+    // get_first_command(shell);
+    // get_rest_command(shell);
+    // conditions(shell, env);
     //START EXECUTION;
 }
+/// ta

@@ -117,6 +117,7 @@ void    get_first_command_pipe(t_list *shell, int c)
     int start;
     int len;
 
+
     i = skip_spaces(0, shell->tab[c]);
     len = ft_strlen(shell->tab[c]);
     start = i;

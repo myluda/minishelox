@@ -18,6 +18,7 @@ void    execute(t_list *shell, char **argvv)
     while(shell->path[i])
     {
         execve(ft_strjoin(shell->path[i],shell->f_cmd), argvv, envv);
+        //printf("command line = |%s|\n",shell->f_cmd);
         i++;
     }
     exit(0);
@@ -40,7 +41,7 @@ void exec_cmd(char **env, t_list *shell)
     }
     wait(NULL);
 }
-void exec_cmd_pipe(char **env, t_list *shell)
+void exec_cmd_pipe(char **env, t_list *shell, int c)
 {
     int     i;
     int     id;
@@ -50,8 +51,8 @@ void exec_cmd_pipe(char **env, t_list *shell)
     i = 0;
     if(id == 0)
     {
-        close(shell->g_fd);
-        dup2(shell->stdio[1], 1);
+        //close(shell->g_fd);
+        //dup2(shell->stdio[1], 1);
         argvv = ft_split(ft_join(shell),' ');
         execute(shell, argvv);
     }
