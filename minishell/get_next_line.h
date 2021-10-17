@@ -119,7 +119,7 @@ void exec_cmd_pipe(char **env, t_list *shell, int i);
 void    get_rest_command_pipe(t_list *shell , int c);
 void    conditions_pipe(t_list *shell, char **env,int i);
 void    ft_initiate_pipe(t_list *shell, int pipes, char **env);
-
+void    ft_check_redr_pipe(t_list *shell, int c);
 
 
 

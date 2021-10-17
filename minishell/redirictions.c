@@ -88,3 +88,36 @@ void    ft_check_redr(t_list *shell)
     }
     shell->buffer = ft_strjoin(ptr,ft_substr(shell->buffer,start,i - start));
 }
+
+void    ft_check_redr_pipe(t_list *shell, int c)
+{
+    int i = 0;
+    int start = 0;
+    int flag=0;
+    char *ptr;
+
+    ptr = ft_strdup("");
+    shell->g_red_buff = ft_strdup("");
+    while(shell->tab[c][i])
+    {
+        if (is_quote(shell->tab[c][i]) && flag == 0)
+            flag = 1;
+        else if(is_quote(shell->tab[c][i]) && flag == 1)
+            flag = 0;
+        else
+        {
+            while(shell->tab[c][i] == '>' && shell->tab[c][i] != '\0' && flag == 0)
+            {
+                if(shell->tab[c][i] == '>' && shell->buffer[i+1] == '>')
+                    i = double_redr(shell, &ptr, &start, i);
+                if(shell->tab[c][i] == '>' && shell->tab[c][i+1] != '>')
+                    i = single_redr(shell, &ptr, &start, i);
+            }
+            if(shell->tab[c][i] == '<')
+                i = check_readrd(shell, &ptr, &start, i);
+        }
+        i++;   
+    }
+    shell->tab[c] = ft_strjoin(ptr,ft_substr(shell->tab[c],start,i - start));
+    printf("s ===> |%s|\n",shell->tab[c]);
+}

@@ -1,5 +1,5 @@
 
-CC = gcc -g -o minishell
+CC = gcc -fsanitize=address -g -o minishell
 
 SRC =  *.c
 
